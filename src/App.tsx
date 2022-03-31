@@ -1,42 +1,57 @@
 import React, {useState} from 'react';
-// import { AuthProvider } from './context/AuthContext';
-import './App.scss';
-// import UserAuth from './components/userAuth/UserAuth';
-// import Bank from './pages/bank/Bank'
+import classes from './App.module.scss';
 import Title from './components/title/Title'
-import SubTitle from './components/subTitle/SubTitle';
-import Counter from './components/counter/Counter';
-import Button from './components/button/Button';
+import {useAutoResize} from './components/hooks/index'
 
 
 
-function App() {
-  const [countA, setCountA] = useState<number>(0);
-  const [countB, setCountB] = useState<number>(0);
+const App = () => {
+  const [itemList, setItemList] = useState<string[]>([]);
+  const [value, setValue] = useState<string>('');
 
-  const handleCountUpA = () => {
-    setCountA(countA + 1);
-  };
-  const handleCountUpB = () => {
-    setCountB(countB + 1);
-  };
+  // 「送信する」ボタンが押されたときに発火する関数
+  const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); //ページのリロードが起こらない
+    setItemList([...itemList, value]);
+    setValue('');
+  }
 
-  console.log("--------------");
-  
+  // textareaへ文字列が入力されたときに発火する関数
+  const handleChange = (e:React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+  }
+
+  // textarea要素の高さを動的に調整するためのカスタムフック
+  const textareaRef = useAutoResize(value);
 
   return (
-    <div className="App">
-      <Title titleText={'#6 useCallback'} />
-      <SubTitle subTitleText={'アンケート'}/>
-      <div className='ItemList'>
-        <div className='item'>
-          <Counter counterTitle={'A'} count={countA} />
-          <Button buttonText={"A派"} onClick={handleCountUpA} />
+    <div className={classes.app}>
+      <Title titleText={'#8 useRef'} />
+      <div className={classes.content}>
+        <div className={classes.itemList}>
+          {itemList.length === 0 ? (
+            <h3>No Items</h3>
+            ) : (
+            <ul className={classes.ul}>
+              {itemList.map((item) => {
+                return (<li className={classes.li} key={item}>{item}</li>)
+            })}
+            </ul>
+          )}
         </div>
-        <div className='item'>
-          <Counter counterTitle={'B'} count={countB} />
-          <Button buttonText={"B派"} onClick={handleCountUpB} />
-        </div>
+        <form onSubmit={(e) => handleSubmit(e)} className={classes.form}>
+          <textarea 
+            value={value} 
+            onChange={(e) => {
+              handleChange(e);
+              }} 
+              // 現在参照している要素をtextareaに設定
+              ref = {textareaRef}
+              className={classes.textarea}
+          >
+          </textarea>
+          <button className={classes.button}>送信する</button>
+        </form>
       </div>
     </div>
   );
